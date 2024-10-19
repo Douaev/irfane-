@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<base target="_top">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+	<title>Carte du Maroc - Leaflet</title>
+	
+	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="douae2.geojson"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-measure/dist/leaflet-measure.css" />
+    <script src="https://unpkg.com/leaflet-measure/dist/leaflet-measure.js"></script>
+
+	<style>
+		html, body {
+			height: 100%;
+			margin: 0;
+			background-color: red;
+		}
+		.leaflet-container {
+			height: 100vh;
+			width: 100vw;
+		}
+		.header {
+			background-color: beige;
+			color: black;
+			font-family: "Times New Roman", Times, serif;
+			text-align: center;
+			padding: 20px;
+			position: relative;
+			border-radius: 8px;
+			box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+			margin: 10px;
+		}
+		.header:before,
+		.header:after {
+			content: "✏️📏";
+			position: absolute;
+			top: 50%;
+			transform: translateY(-50%);
+			font-size: 24px;
+		}
+		.header:before {
+			left: 10px;
+		}
+		.header:after {
+			right: 10px;
+		}
+		.time {
+			font-size: 18px;
+			font-weight: bold;
+			margin-top: 10px;
+		}
+		.mood-container {
+			margin: 10px 0;
+		}
+		.mood {
+			font-size: 32px;
+			cursor: pointer;
+			margin: 0 5px;
+		}
+		.comment {
+			font-size: 16px;
+			color: #555;
+		}
+	</style>
+
+</head>
+<body>
+
+	<div class="header">
+		<h1>Bienvenue à Madinat al Irfane</h1>
+		<div class="time" id="currentTime"></div>
+		<div class="mood-container">
+			<span class="comment">Clique sur ton humeur du jour:</span>
+			<span class="mood" onclick="setMood('😊')">😊</span>
+			<span class="mood" onclick="setMood('😐')">😐</span>
+			<span class="mood" onclick="setMood('😢')">😢</span>
+			<span class="mood" onclick="setMood('😄')">😄</span>
+		</div>
+	</div>
+
+	<div id="map"></div>
+	<script>
+		const map = L.map('map').setView([33.981579, -6.864073], 13);
+		const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			maxZoom: 19,
+			attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+		}).addTo(map);
+		const marker = L.marker([33.981579, -6.864073]).addTo(map)
+			.bindPopup('<b>Irfane</b><br />Ceci est un marqueur.').openPopup();
+		const geocoder = L.Control.Geocoder.nominatim();
+		L.Control.geocoder({
+			placeholder: 'Rechercher un lieu...',
+			defaultMarkGeocode: true
+		}).addTo(map);
+		L.control.measure({
+			position: 'topright',
+			primaryLengthUnit: 'meters',
+			secondaryLengthUnit: 'feet',
+			primaryAreaUnit: 'hectares',
+			secondaryAreaUnit: 'acres',
+			measureControlTitle: 'Mesurer',
+			feet: true
+		}).addTo(map);
+		function onMapClick(e) {
+			const popup = L.popup()
+				.setLatLng(e.latlng)
+				.setContent(`Vous avez cliqué sur la carte à ${e.latlng.toString()}`)
+				.openOn(map);
+		}
+		map.on('click', onMapClick);
+		function updateTime() {
+			const now = new Date();
+			const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+			document.getElementById('currentTime').textContent = now.toLocaleTimeString('fr-FR', options);
+		}
+        L.geoJSON(doudou).addTo(map);
+		setInterval(updateTime, 1000);
+		updateTime();
+		function setMood(mood) {
+			alert(`Votre humeur du jour est: ${mood}`);
+		}
+	</script>
+
+</body>
+</html>
